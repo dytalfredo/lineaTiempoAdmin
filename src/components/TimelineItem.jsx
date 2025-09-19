@@ -1,10 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react';
-import Modal from './Modal.jsx'; // Importa el nuevo componente Modal
 
-const TimelineItem = ({ year, title, description, imageUrl, isLeftAligned }) => {
+const TimelineItem = ({ id, year, title, description, imageUrl, isLeftAligned }) => {
   const itemRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Nuevo estado para el modal
+  const [isImageExpanded, setIsImageExpanded] = useState(false); // Nuevo estado para la expansión de la imagen
+
+  const loadingStrategy = id === 1 ? 'eager' : 'lazy';
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -32,10 +33,25 @@ const TimelineItem = ({ year, title, description, imageUrl, isLeftAligned }) => 
     };
   }, []);
 
+  // Efecto para cerrar la imagen expandida al presionar ESC
+  useEffect(() => {
+    const handleEscapeKey = (event) => {
+      if (event.key === 'Escape') {
+        setIsImageExpanded(false);
+      }
+    };
+    if (isImageExpanded) {
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isImageExpanded]);
+
+
   const animationClass = isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10';
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  const toggleImageExpand = () => setIsImageExpanded(!isImageExpanded);
 
   return (
     <div
@@ -72,23 +88,38 @@ const TimelineItem = ({ year, title, description, imageUrl, isLeftAligned }) => 
         <p className="text-lg text-ink leading-relaxed mb-6 text-center md:text-left">
           {description}
         </p>
-        <div className="flex justify-center">
+        <div className="flex justify-center relative"> {/* Relative para posicionar la imagen expandida */}
           <img
             src={imageUrl}
             alt={title}
-            className="rounded-lg shadow-md max-w-full h-auto object-cover border-2 border-sepia-light cursor-pointer hover:scale-105 transition-transform duration-200"
-            onClick={openModal} // Añade el manejador de clic aquí
+            className="rounded-lg shadow-md max-w-full h-auto object-cover border-2 border-sepia-light cursor-zoom-in hover:scale-105 transition-transform duration-200"
+            onClick={toggleImageExpand} // Usa el nuevo manejador
+            loading={loadingStrategy}
           />
+
+          {/* Imagen Ampliada */}
+          {isImageExpanded && (
+            <div
+              className="fixed inset-0 flex justify-center items-center z-50 bg-black bg-opacity-50 cursor-zoom-out" // Fondo semitransparente más ligero
+              onClick={toggleImageExpand} // Cierra al hacer clic en el fondo
+            >
+              <img
+                src={imageUrl}
+                alt={title}
+                className="max-w-[100vw] max-h-[100vh] rounded-lg shadow-2xl border-4 border-sepia-light transform scale-95 animate-zoom-in-image transition-transform duration-300 ease-out"
+                onClick={(e) => e.stopPropagation()} // Evita que el clic en la imagen cierre el lightbox
+              />
+              <button
+                onClick={toggleImageExpand}
+                className="absolute top-4 right-4 text-white text-5xl leading-none font-bold p-2 transition-colors hover:text-sepia-light"
+                aria-label="Cerrar imagen"
+              >
+                &times;
+              </button>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Renderiza el Modal */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        imageUrl={imageUrl}
-        title={title}
-      />
     </div>
   );
 };
