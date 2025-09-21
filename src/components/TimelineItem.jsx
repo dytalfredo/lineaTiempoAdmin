@@ -1,37 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react';
 
 const TimelineItem = ({ id, year, title, description, imageUrl, isLeftAligned }) => {
-  const itemRef = useRef(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const [isImageExpanded, setIsImageExpanded] = useState(false); // Nuevo estado para la expansión de la imagen
+  // Ya no necesitamos itemRef para IntersectionObserver, pero lo mantenemos si quieres un punto de anclaje
+  // para otras cosas o si en el futuro queremos observar algo más específico.
+  // Sin embargo, para la animación de scroll pura, se puede aplicar directamente a las clases.
 
-  const loadingStrategy = id === 1 ? 'eager' : 'lazy';
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsVisible(true);
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      {
-        threshold: 0.3,
-      }
-    );
-
-    if (itemRef.current) {
-      observer.observe(itemRef.current);
-    }
-
-    return () => {
-      if (itemRef.current) {
-        observer.unobserve(itemRef.current);
-      }
-    };
-  }, []);
+  const [isImageExpanded, setIsImageExpanded] = useState(false);
+  const loadingStrategy = id === 1 ? 'eager' : 'lazy'; // Mantenemos la carga diferida
 
   // Efecto para cerrar la imagen expandida al presionar ESC
   useEffect(() => {
@@ -48,16 +23,13 @@ const TimelineItem = ({ id, year, title, description, imageUrl, isLeftAligned })
     };
   }, [isImageExpanded]);
 
-
-  const animationClass = isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10';
-
   const toggleImageExpand = () => setIsImageExpanded(!isImageExpanded);
 
   return (
     <div
-      ref={itemRef}
-      className={`relative w-full flex flex-col items-center my-12 transition-all duration-1000 ease-out ${animationClass}
-                  md:flex-row md:justify-center`}
+      // Aplicaremos las clases de animación directamente aquí o en elementos hijos
+      // La clase 'timeline-item-animated' se definirá en CSS para usar scroll-timeline
+      className={`relative w-full flex flex-col items-center my-12 md:flex-row md:justify-center timeline-item-animated`}
     >
       {/* Línea divisoria central */}
       <div className="absolute left-1/2 -translate-x-1/2 h-full w-0.5 bg-sepia-dark hidden md:block z-0"></div>
@@ -88,26 +60,26 @@ const TimelineItem = ({ id, year, title, description, imageUrl, isLeftAligned })
         <p className="text-lg text-ink leading-relaxed mb-6 text-center md:text-left">
           {description}
         </p>
-        <div className="flex justify-center relative"> {/* Relative para posicionar la imagen expandida */}
+        <div className="flex justify-center relative">
           <img
             src={imageUrl}
             alt={title}
             className="rounded-lg shadow-md max-w-full h-auto object-cover border-2 border-sepia-light cursor-zoom-in hover:scale-105 transition-transform duration-200"
-            onClick={toggleImageExpand} // Usa el nuevo manejador
+            onClick={toggleImageExpand}
             loading={loadingStrategy}
           />
 
           {/* Imagen Ampliada */}
           {isImageExpanded && (
             <div
-              className="fixed inset-0 flex justify-center items-center z-50 bg-black bg-opacity-50 cursor-zoom-out" // Fondo semitransparente más ligero
-              onClick={toggleImageExpand} // Cierra al hacer clic en el fondo
+              className="fixed inset-0 flex justify-center items-center z-50 bg-black bg-opacity-50 cursor-zoom-out"
+              onClick={toggleImageExpand}
             >
               <img
                 src={imageUrl}
                 alt={title}
-                className="max-w-[100vw] max-h-[100vh] rounded-lg shadow-2xl border-4 border-sepia-light transform scale-95 animate-zoom-in-image transition-transform duration-300 ease-out"
-                onClick={(e) => e.stopPropagation()} // Evita que el clic en la imagen cierre el lightbox
+                className="max-w-[90vw] max-h-[90vh] rounded-lg shadow-2xl border-4 border-sepia-light transform scale-95 animate-zoom-in-image transition-transform duration-300 ease-out"
+                onClick={(e) => e.stopPropagation()}
               />
               <button
                 onClick={toggleImageExpand}

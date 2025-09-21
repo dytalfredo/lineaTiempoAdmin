@@ -10,3 +10,44 @@
 .animate-fade-in-modal {
   animation: fadeInModal 0.3s ease-out forwards;
 }
+
+@keyframes zoomInImage {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.animate-zoom-in-image {
+  animation: zoomInImage 0.3s ease-out forwards;
+}
+
+/* ------------------------------------------- */
+/* CSS Scroll-Driven Animations */
+/* ------------------------------------------- */
+
+/* Define la animación keyframe */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(250px) scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Aplica la animación al elemento con la clase timeline-item-animated */
+.timeline-item-animated {
+  
+  /* Vincular la animación al scroll del viewport */
+  animation: reveal both;
+  animation-timeline: view();
+  animation-range: entry 25% cover 50%; /* Ajusta estos valores según la preferencia */
+}
+
+/* Polyfill para navegadores que no soportan scroll-timeline (opcional, pero recomendado) */
+/* Puedes usar una librería como https://github.com/flackr/scroll-timeline-polyfill */
+/* Para incluirlo, descarga el JS y agrégalo a tu BaseLayout o index.astro con un script tag.
+   Por ejemplo, en BaseLayout.astro:
+   <script type="module" src="/path/to/scroll-timeline-polyfill.js"></script>
+*/

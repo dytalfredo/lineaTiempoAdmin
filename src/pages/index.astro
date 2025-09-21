@@ -13,7 +13,7 @@ const timelineItems = timelineData.map((item, index) => ({
 
 <BaseLayout title="Línea del Tiempo de la Administración">
   <Header /> {/* Incluye el encabezado con la jerarquía principal */}
-  <main class="container mx-auto px-4 py-12 md:px-8 max-w-6xl">
+  <main class="container mx-auto px-4 py-4 md:px-8 max-w-6xl">
     <section class="timeline relative">
       {timelineItems.map((item) => (
         <TimelineItem client:load {...item} />
